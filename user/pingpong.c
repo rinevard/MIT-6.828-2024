@@ -11,30 +11,23 @@ int main() {
     pipe(p_child_sender);
 
     if (fork() == 0) {
-        // 父进程先写, 子进程先读
-        while (read(p_parent_sender[0], buf, 2)) {
-            write(1, "child read: ", 12);
-            write(1, buf, 2);
-            write(1, "\n", 1);
-            sleep(1);
-            write(p_child_sender[1], buf, 2);
-        }
+        // 子进程先读
+        read(p_parent_sender[0], buf, 2);
+        printf("%d: received ping\n", getpid());
+        write(p_child_sender[1], buf, 2);
+
         close(p_parent_sender[0]);
         close(p_parent_sender[1]);
         close(p_child_sender[0]);
         close(p_child_sender[1]);
         exit(0);
     }
-    // 父进程先写, 子进程先读
-    buf[0] = 'b';
-    buf[1] = '\0';
+
+    // 父进程先写
     write(p_parent_sender[1], buf, 2);
-    while (read(p_child_sender[0], buf, 2)) {
-        write(1, "paren read: ", 12);
-        write(1, buf, 2);
-        write(1, "\n", 1);
-        write(p_parent_sender[1], buf, 2);
-    }
+    read(p_child_sender[0], buf, 2);
+    printf("%d: received pong\n", getpid());
+
     close(p_parent_sender[0]);
     close(p_parent_sender[1]);
     close(p_child_sender[0]);
