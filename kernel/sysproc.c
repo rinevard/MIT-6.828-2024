@@ -71,3 +71,10 @@ uint64 sys_uptime(void) {
     release(&tickslock);
     return xticks;
 }
+
+uint64 sys_trace(void) {
+    uint64 p;
+    argaddr(0, &p);
+    myproc()->trace_mask = p;
+    return 0;
+}
