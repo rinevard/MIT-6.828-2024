@@ -1,7 +1,19 @@
 [
   {
     "arguments": [
-      "/usr/bin/riscv64-unknown-elf-gcc",
+      "/usr/bin/riscv64-linux-gnu-gcc",
+      "-c",
+      "-o",
+      "kernel/entry.o",
+      "kernel/entry.S"
+    ],
+    "directory": "/home/rinevard/MIT-6.828-2024",
+    "file": "/home/rinevard/MIT-6.828-2024/kernel/entry.S",
+    "output": "/home/rinevard/MIT-6.828-2024/kernel/entry.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/riscv64-linux-gnu-gcc",
       "-Wall",
       "-Werror",
       "-O",
@@ -38,13 +50,13 @@
       "kernel/kalloc.o",
       "kernel/kalloc.c"
     ],
-    "directory": "/home/rinevard/open-course/xv6-labs-2024",
-    "file": "/home/rinevard/open-course/xv6-labs-2024/kernel/kalloc.c",
-    "output": "/home/rinevard/open-course/xv6-labs-2024/kernel/kalloc.o"
+    "directory": "/home/rinevard/MIT-6.828-2024",
+    "file": "/home/rinevard/MIT-6.828-2024/kernel/kalloc.c",
+    "output": "/home/rinevard/MIT-6.828-2024/kernel/kalloc.o"
   },
   {
     "arguments": [
-      "/usr/bin/riscv64-unknown-elf-gcc",
+      "/usr/bin/riscv64-linux-gnu-gcc",
       "-Wall",
       "-Werror",
       "-O",
@@ -81,13 +93,13 @@
       "kernel/string.o",
       "kernel/string.c"
     ],
-    "directory": "/home/rinevard/open-course/xv6-labs-2024",
-    "file": "/home/rinevard/open-course/xv6-labs-2024/kernel/string.c",
-    "output": "/home/rinevard/open-course/xv6-labs-2024/kernel/string.o"
+    "directory": "/home/rinevard/MIT-6.828-2024",
+    "file": "/home/rinevard/MIT-6.828-2024/kernel/string.c",
+    "output": "/home/rinevard/MIT-6.828-2024/kernel/string.o"
   },
   {
     "arguments": [
-      "/usr/bin/riscv64-unknown-elf-gcc",
+      "/usr/bin/riscv64-linux-gnu-gcc",
       "-Wall",
       "-Werror",
       "-O",
@@ -124,13 +136,13 @@
       "kernel/main.o",
       "kernel/main.c"
     ],
-    "directory": "/home/rinevard/open-course/xv6-labs-2024",
-    "file": "/home/rinevard/open-course/xv6-labs-2024/kernel/main.c",
-    "output": "/home/rinevard/open-course/xv6-labs-2024/kernel/main.o"
+    "directory": "/home/rinevard/MIT-6.828-2024",
+    "file": "/home/rinevard/MIT-6.828-2024/kernel/main.c",
+    "output": "/home/rinevard/MIT-6.828-2024/kernel/main.o"
   },
   {
     "arguments": [
-      "/usr/bin/riscv64-unknown-elf-gcc",
+      "/usr/bin/riscv64-linux-gnu-gcc",
       "-Wall",
       "-Werror",
       "-O",
@@ -167,13 +179,13 @@
       "kernel/vm.o",
       "kernel/vm.c"
     ],
-    "directory": "/home/rinevard/open-course/xv6-labs-2024",
-    "file": "/home/rinevard/open-course/xv6-labs-2024/kernel/vm.c",
-    "output": "/home/rinevard/open-course/xv6-labs-2024/kernel/vm.o"
+    "directory": "/home/rinevard/MIT-6.828-2024",
+    "file": "/home/rinevard/MIT-6.828-2024/kernel/vm.c",
+    "output": "/home/rinevard/MIT-6.828-2024/kernel/vm.o"
   },
   {
     "arguments": [
-      "/usr/bin/riscv64-unknown-elf-gcc",
+      "/usr/bin/riscv64-linux-gnu-gcc",
       "-Wall",
       "-Werror",
       "-O",
@@ -210,13 +222,37 @@
       "kernel/proc.o",
       "kernel/proc.c"
     ],
-    "directory": "/home/rinevard/open-course/xv6-labs-2024",
-    "file": "/home/rinevard/open-course/xv6-labs-2024/kernel/proc.c",
-    "output": "/home/rinevard/open-course/xv6-labs-2024/kernel/proc.o"
+    "directory": "/home/rinevard/MIT-6.828-2024",
+    "file": "/home/rinevard/MIT-6.828-2024/kernel/proc.c",
+    "output": "/home/rinevard/MIT-6.828-2024/kernel/proc.o"
   },
   {
     "arguments": [
-      "/usr/bin/riscv64-unknown-elf-gcc",
+      "/usr/bin/riscv64-linux-gnu-gcc",
+      "-c",
+      "-o",
+      "kernel/swtch.o",
+      "kernel/swtch.S"
+    ],
+    "directory": "/home/rinevard/MIT-6.828-2024",
+    "file": "/home/rinevard/MIT-6.828-2024/kernel/swtch.S",
+    "output": "/home/rinevard/MIT-6.828-2024/kernel/swtch.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/riscv64-linux-gnu-gcc",
+      "-c",
+      "-o",
+      "kernel/trampoline.o",
+      "kernel/trampoline.S"
+    ],
+    "directory": "/home/rinevard/MIT-6.828-2024",
+    "file": "/home/rinevard/MIT-6.828-2024/kernel/trampoline.S",
+    "output": "/home/rinevard/MIT-6.828-2024/kernel/trampoline.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/riscv64-linux-gnu-gcc",
       "-Wall",
       "-Werror",
       "-O",
@@ -253,13 +289,13 @@
       "kernel/trap.o",
       "kernel/trap.c"
     ],
-    "directory": "/home/rinevard/open-course/xv6-labs-2024",
-    "file": "/home/rinevard/open-course/xv6-labs-2024/kernel/trap.c",
-    "output": "/home/rinevard/open-course/xv6-labs-2024/kernel/trap.o"
+    "directory": "/home/rinevard/MIT-6.828-2024",
+    "file": "/home/rinevard/MIT-6.828-2024/kernel/trap.c",
+    "output": "/home/rinevard/MIT-6.828-2024/kernel/trap.o"
   },
   {
     "arguments": [
-      "/usr/bin/riscv64-unknown-elf-gcc",
+      "/usr/bin/riscv64-linux-gnu-gcc",
       "-Wall",
       "-Werror",
       "-O",
@@ -296,13 +332,13 @@
       "kernel/syscall.o",
       "kernel/syscall.c"
     ],
-    "directory": "/home/rinevard/open-course/xv6-labs-2024",
-    "file": "/home/rinevard/open-course/xv6-labs-2024/kernel/syscall.c",
-    "output": "/home/rinevard/open-course/xv6-labs-2024/kernel/syscall.o"
+    "directory": "/home/rinevard/MIT-6.828-2024",
+    "file": "/home/rinevard/MIT-6.828-2024/kernel/syscall.c",
+    "output": "/home/rinevard/MIT-6.828-2024/kernel/syscall.o"
   },
   {
     "arguments": [
-      "/usr/bin/riscv64-unknown-elf-gcc",
+      "/usr/bin/riscv64-linux-gnu-gcc",
       "-Wall",
       "-Werror",
       "-O",
@@ -339,13 +375,13 @@
       "kernel/sysproc.o",
       "kernel/sysproc.c"
     ],
-    "directory": "/home/rinevard/open-course/xv6-labs-2024",
-    "file": "/home/rinevard/open-course/xv6-labs-2024/kernel/sysproc.c",
-    "output": "/home/rinevard/open-course/xv6-labs-2024/kernel/sysproc.o"
+    "directory": "/home/rinevard/MIT-6.828-2024",
+    "file": "/home/rinevard/MIT-6.828-2024/kernel/sysproc.c",
+    "output": "/home/rinevard/MIT-6.828-2024/kernel/sysproc.o"
   },
   {
     "arguments": [
-      "/usr/bin/riscv64-unknown-elf-gcc",
+      "/usr/bin/riscv64-linux-gnu-gcc",
       "-Wall",
       "-Werror",
       "-O",
@@ -382,13 +418,13 @@
       "kernel/bio.o",
       "kernel/bio.c"
     ],
-    "directory": "/home/rinevard/open-course/xv6-labs-2024",
-    "file": "/home/rinevard/open-course/xv6-labs-2024/kernel/bio.c",
-    "output": "/home/rinevard/open-course/xv6-labs-2024/kernel/bio.o"
+    "directory": "/home/rinevard/MIT-6.828-2024",
+    "file": "/home/rinevard/MIT-6.828-2024/kernel/bio.c",
+    "output": "/home/rinevard/MIT-6.828-2024/kernel/bio.o"
   },
   {
     "arguments": [
-      "/usr/bin/riscv64-unknown-elf-gcc",
+      "/usr/bin/riscv64-linux-gnu-gcc",
       "-Wall",
       "-Werror",
       "-O",
@@ -425,13 +461,13 @@
       "kernel/fs.o",
       "kernel/fs.c"
     ],
-    "directory": "/home/rinevard/open-course/xv6-labs-2024",
-    "file": "/home/rinevard/open-course/xv6-labs-2024/kernel/fs.c",
-    "output": "/home/rinevard/open-course/xv6-labs-2024/kernel/fs.o"
+    "directory": "/home/rinevard/MIT-6.828-2024",
+    "file": "/home/rinevard/MIT-6.828-2024/kernel/fs.c",
+    "output": "/home/rinevard/MIT-6.828-2024/kernel/fs.o"
   },
   {
     "arguments": [
-      "/usr/bin/riscv64-unknown-elf-gcc",
+      "/usr/bin/riscv64-linux-gnu-gcc",
       "-Wall",
       "-Werror",
       "-O",
@@ -468,13 +504,13 @@
       "kernel/log.o",
       "kernel/log.c"
     ],
-    "directory": "/home/rinevard/open-course/xv6-labs-2024",
-    "file": "/home/rinevard/open-course/xv6-labs-2024/kernel/log.c",
-    "output": "/home/rinevard/open-course/xv6-labs-2024/kernel/log.o"
+    "directory": "/home/rinevard/MIT-6.828-2024",
+    "file": "/home/rinevard/MIT-6.828-2024/kernel/log.c",
+    "output": "/home/rinevard/MIT-6.828-2024/kernel/log.o"
   },
   {
     "arguments": [
-      "/usr/bin/riscv64-unknown-elf-gcc",
+      "/usr/bin/riscv64-linux-gnu-gcc",
       "-Wall",
       "-Werror",
       "-O",
@@ -511,13 +547,13 @@
       "kernel/sleeplock.o",
       "kernel/sleeplock.c"
     ],
-    "directory": "/home/rinevard/open-course/xv6-labs-2024",
-    "file": "/home/rinevard/open-course/xv6-labs-2024/kernel/sleeplock.c",
-    "output": "/home/rinevard/open-course/xv6-labs-2024/kernel/sleeplock.o"
+    "directory": "/home/rinevard/MIT-6.828-2024",
+    "file": "/home/rinevard/MIT-6.828-2024/kernel/sleeplock.c",
+    "output": "/home/rinevard/MIT-6.828-2024/kernel/sleeplock.o"
   },
   {
     "arguments": [
-      "/usr/bin/riscv64-unknown-elf-gcc",
+      "/usr/bin/riscv64-linux-gnu-gcc",
       "-Wall",
       "-Werror",
       "-O",
@@ -554,13 +590,13 @@
       "kernel/file.o",
       "kernel/file.c"
     ],
-    "directory": "/home/rinevard/open-course/xv6-labs-2024",
-    "file": "/home/rinevard/open-course/xv6-labs-2024/kernel/file.c",
-    "output": "/home/rinevard/open-course/xv6-labs-2024/kernel/file.o"
+    "directory": "/home/rinevard/MIT-6.828-2024",
+    "file": "/home/rinevard/MIT-6.828-2024/kernel/file.c",
+    "output": "/home/rinevard/MIT-6.828-2024/kernel/file.o"
   },
   {
     "arguments": [
-      "/usr/bin/riscv64-unknown-elf-gcc",
+      "/usr/bin/riscv64-linux-gnu-gcc",
       "-Wall",
       "-Werror",
       "-O",
@@ -597,13 +633,13 @@
       "kernel/pipe.o",
       "kernel/pipe.c"
     ],
-    "directory": "/home/rinevard/open-course/xv6-labs-2024",
-    "file": "/home/rinevard/open-course/xv6-labs-2024/kernel/pipe.c",
-    "output": "/home/rinevard/open-course/xv6-labs-2024/kernel/pipe.o"
+    "directory": "/home/rinevard/MIT-6.828-2024",
+    "file": "/home/rinevard/MIT-6.828-2024/kernel/pipe.c",
+    "output": "/home/rinevard/MIT-6.828-2024/kernel/pipe.o"
   },
   {
     "arguments": [
-      "/usr/bin/riscv64-unknown-elf-gcc",
+      "/usr/bin/riscv64-linux-gnu-gcc",
       "-Wall",
       "-Werror",
       "-O",
@@ -640,13 +676,13 @@
       "kernel/exec.o",
       "kernel/exec.c"
     ],
-    "directory": "/home/rinevard/open-course/xv6-labs-2024",
-    "file": "/home/rinevard/open-course/xv6-labs-2024/kernel/exec.c",
-    "output": "/home/rinevard/open-course/xv6-labs-2024/kernel/exec.o"
+    "directory": "/home/rinevard/MIT-6.828-2024",
+    "file": "/home/rinevard/MIT-6.828-2024/kernel/exec.c",
+    "output": "/home/rinevard/MIT-6.828-2024/kernel/exec.o"
   },
   {
     "arguments": [
-      "/usr/bin/riscv64-unknown-elf-gcc",
+      "/usr/bin/riscv64-linux-gnu-gcc",
       "-Wall",
       "-Werror",
       "-O",
@@ -683,13 +719,25 @@
       "kernel/sysfile.o",
       "kernel/sysfile.c"
     ],
-    "directory": "/home/rinevard/open-course/xv6-labs-2024",
-    "file": "/home/rinevard/open-course/xv6-labs-2024/kernel/sysfile.c",
-    "output": "/home/rinevard/open-course/xv6-labs-2024/kernel/sysfile.o"
+    "directory": "/home/rinevard/MIT-6.828-2024",
+    "file": "/home/rinevard/MIT-6.828-2024/kernel/sysfile.c",
+    "output": "/home/rinevard/MIT-6.828-2024/kernel/sysfile.o"
   },
   {
     "arguments": [
-      "/usr/bin/riscv64-unknown-elf-gcc",
+      "/usr/bin/riscv64-linux-gnu-gcc",
+      "-c",
+      "-o",
+      "kernel/kernelvec.o",
+      "kernel/kernelvec.S"
+    ],
+    "directory": "/home/rinevard/MIT-6.828-2024",
+    "file": "/home/rinevard/MIT-6.828-2024/kernel/kernelvec.S",
+    "output": "/home/rinevard/MIT-6.828-2024/kernel/kernelvec.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/riscv64-linux-gnu-gcc",
       "-Wall",
       "-Werror",
       "-O",
@@ -726,13 +774,13 @@
       "kernel/plic.o",
       "kernel/plic.c"
     ],
-    "directory": "/home/rinevard/open-course/xv6-labs-2024",
-    "file": "/home/rinevard/open-course/xv6-labs-2024/kernel/plic.c",
-    "output": "/home/rinevard/open-course/xv6-labs-2024/kernel/plic.o"
+    "directory": "/home/rinevard/MIT-6.828-2024",
+    "file": "/home/rinevard/MIT-6.828-2024/kernel/plic.c",
+    "output": "/home/rinevard/MIT-6.828-2024/kernel/plic.o"
   },
   {
     "arguments": [
-      "/usr/bin/riscv64-unknown-elf-gcc",
+      "/usr/bin/riscv64-linux-gnu-gcc",
       "-Wall",
       "-Werror",
       "-O",
@@ -769,13 +817,13 @@
       "kernel/virtio_disk.o",
       "kernel/virtio_disk.c"
     ],
-    "directory": "/home/rinevard/open-course/xv6-labs-2024",
-    "file": "/home/rinevard/open-course/xv6-labs-2024/kernel/virtio_disk.c",
-    "output": "/home/rinevard/open-course/xv6-labs-2024/kernel/virtio_disk.o"
+    "directory": "/home/rinevard/MIT-6.828-2024",
+    "file": "/home/rinevard/MIT-6.828-2024/kernel/virtio_disk.c",
+    "output": "/home/rinevard/MIT-6.828-2024/kernel/virtio_disk.o"
   },
   {
     "arguments": [
-      "/usr/bin/riscv64-unknown-elf-gcc",
+      "/usr/bin/riscv64-linux-gnu-gcc",
       "-Wall",
       "-Werror",
       "-O",
@@ -812,13 +860,13 @@
       "kernel/start.o",
       "kernel/start.c"
     ],
-    "directory": "/home/rinevard/open-course/xv6-labs-2024",
-    "file": "/home/rinevard/open-course/xv6-labs-2024/kernel/start.c",
-    "output": "/home/rinevard/open-course/xv6-labs-2024/kernel/start.o"
+    "directory": "/home/rinevard/MIT-6.828-2024",
+    "file": "/home/rinevard/MIT-6.828-2024/kernel/start.c",
+    "output": "/home/rinevard/MIT-6.828-2024/kernel/start.o"
   },
   {
     "arguments": [
-      "/usr/bin/riscv64-unknown-elf-gcc",
+      "/usr/bin/riscv64-linux-gnu-gcc",
       "-Wall",
       "-Werror",
       "-O",
@@ -855,13 +903,13 @@
       "kernel/console.o",
       "kernel/console.c"
     ],
-    "directory": "/home/rinevard/open-course/xv6-labs-2024",
-    "file": "/home/rinevard/open-course/xv6-labs-2024/kernel/console.c",
-    "output": "/home/rinevard/open-course/xv6-labs-2024/kernel/console.o"
+    "directory": "/home/rinevard/MIT-6.828-2024",
+    "file": "/home/rinevard/MIT-6.828-2024/kernel/console.c",
+    "output": "/home/rinevard/MIT-6.828-2024/kernel/console.o"
   },
   {
     "arguments": [
-      "/usr/bin/riscv64-unknown-elf-gcc",
+      "/usr/bin/riscv64-linux-gnu-gcc",
       "-Wall",
       "-Werror",
       "-O",
@@ -898,13 +946,13 @@
       "kernel/printf.o",
       "kernel/printf.c"
     ],
-    "directory": "/home/rinevard/open-course/xv6-labs-2024",
-    "file": "/home/rinevard/open-course/xv6-labs-2024/kernel/printf.c",
-    "output": "/home/rinevard/open-course/xv6-labs-2024/kernel/printf.o"
+    "directory": "/home/rinevard/MIT-6.828-2024",
+    "file": "/home/rinevard/MIT-6.828-2024/kernel/printf.c",
+    "output": "/home/rinevard/MIT-6.828-2024/kernel/printf.o"
   },
   {
     "arguments": [
-      "/usr/bin/riscv64-unknown-elf-gcc",
+      "/usr/bin/riscv64-linux-gnu-gcc",
       "-Wall",
       "-Werror",
       "-O",
@@ -941,13 +989,13 @@
       "kernel/uart.o",
       "kernel/uart.c"
     ],
-    "directory": "/home/rinevard/open-course/xv6-labs-2024",
-    "file": "/home/rinevard/open-course/xv6-labs-2024/kernel/uart.c",
-    "output": "/home/rinevard/open-course/xv6-labs-2024/kernel/uart.o"
+    "directory": "/home/rinevard/MIT-6.828-2024",
+    "file": "/home/rinevard/MIT-6.828-2024/kernel/uart.c",
+    "output": "/home/rinevard/MIT-6.828-2024/kernel/uart.o"
   },
   {
     "arguments": [
-      "/usr/bin/riscv64-unknown-elf-gcc",
+      "/usr/bin/riscv64-linux-gnu-gcc",
       "-Wall",
       "-Werror",
       "-O",
@@ -984,8 +1032,55 @@
       "kernel/spinlock.o",
       "kernel/spinlock.c"
     ],
-    "directory": "/home/rinevard/open-course/xv6-labs-2024",
-    "file": "/home/rinevard/open-course/xv6-labs-2024/kernel/spinlock.c",
-    "output": "/home/rinevard/open-course/xv6-labs-2024/kernel/spinlock.o"
+    "directory": "/home/rinevard/MIT-6.828-2024",
+    "file": "/home/rinevard/MIT-6.828-2024/kernel/spinlock.c",
+    "output": "/home/rinevard/MIT-6.828-2024/kernel/spinlock.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/riscv64-linux-gnu-gcc",
+      "-Wall",
+      "-Werror",
+      "-O",
+      "-fno-omit-frame-pointer",
+      "-ggdb",
+      "-gdwarf-2",
+      "-DSOL_SYSCALL",
+      "-DLAB_SYSCALL",
+      "-mcmodel=medany",
+      "-fno-common",
+      "-fno-builtin-strncpy",
+      "-fno-builtin-strncmp",
+      "-fno-builtin-strlen",
+      "-fno-builtin-memset",
+      "-fno-builtin-memmove",
+      "-fno-builtin-memcmp",
+      "-fno-builtin-log",
+      "-fno-builtin-bzero",
+      "-fno-builtin-strchr",
+      "-fno-builtin-exit",
+      "-fno-builtin-malloc",
+      "-fno-builtin-putc",
+      "-fno-builtin-free",
+      "-fno-builtin-memcpy",
+      "-Wno-main",
+      "-fno-builtin-printf",
+      "-fno-builtin-fprintf",
+      "-fno-builtin-vprintf",
+      "-I.",
+      "-fno-stack-protector",
+      "-fno-pie",
+      "-march=rv64g",
+      "-nostdinc",
+      "-I.",
+      "-Ikernel",
+      "-c",
+      "-o",
+      "user/initcode.o",
+      "user/initcode.S"
+    ],
+    "directory": "/home/rinevard/MIT-6.828-2024",
+    "file": "/home/rinevard/MIT-6.828-2024/user/initcode.S",
+    "output": "/home/rinevard/MIT-6.828-2024/user/initcode.o"
   }
 ]
