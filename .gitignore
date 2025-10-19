@@ -27,3 +27,4 @@ barrier
 *.pcap
 .cache/
 .vscode/
+compile_commands.json
