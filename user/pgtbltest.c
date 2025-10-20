@@ -75,6 +75,7 @@ void print_kpgtbl() {
 void supercheck(uint64 s) {
     pte_t last_pte = 0;
 
+    // iterate virtual address and check whether they are mapped to same pte
     for (uint64 p = s; p < s + 512 * PGSIZE; p += PGSIZE) {
         pte_t pte = (pte_t)pgpte((void *)p);
         if (pte == 0)
@@ -88,11 +89,11 @@ void supercheck(uint64 s) {
         last_pte = pte;
     }
 
-    for (int i = 0; i < 512; i += PGSIZE) {
+    // check whether different va are mapped to different pa
+    for (int i = 0; i < 512 * PGSIZE; i += PGSIZE) {
         *(int *)(s + i) = i;
     }
-
-    for (int i = 0; i < 512; i += PGSIZE) {
+    for (int i = 0; i < 512 * PGSIZE; i += PGSIZE) {
         if (*(int *)(s + i) != i)
             err("wrong value");
     }
