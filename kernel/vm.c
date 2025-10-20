@@ -447,8 +447,29 @@ int copyinstr(pagetable_t pagetable, char *dst, uint64 srcva, uint64 max) {
 }
 
 #ifdef LAB_PGTBL
+const int MAX_LEVEL = 2;
+void _vmprint_helper(pagetable_t pagetable, uint64 father_va, int level) {
+    // there are 2^9 = 512 PTEs in a page table.
+    for (int i = 0; i < 512; i++) {
+        pte_t pte = pagetable[i];
+        if (pte & PTE_V) {
+            for (int i = level; i <= MAX_LEVEL; i++) {
+                printf(" ..");
+            }
+            // 255 << 30 is automatically sign extended to 0xffffffffc0000000
+            uint64 va = father_va + (i << (12 + 9 * level));
+            printf("%p: pte %p pa %p\n", (void *)va, (void *)pte,
+                   (void *)PTE2PA(pte));
+            // this PTE points to a lower-level page table.
+            if (level != 0) {
+                _vmprint_helper((pagetable_t)PTE2PA(pte), va, level - 1);
+            }
+        }
+    }
+}
 void vmprint(pagetable_t pagetable) {
-    // your code here
+    printf("page table %p\n", pagetable);
+    _vmprint_helper(pagetable, 0, MAX_LEVEL);
 }
 #endif
 
