@@ -74,7 +74,16 @@ uint64 sys_uptime(void) {
 }
 
 uint64 sys_sigalarm(void) {
-    // STUB
+    int ticks;
+    uint64 handler;
+
+    argint(0, &ticks);
+    argaddr(1, &handler);
+
+    myproc()->tick_from_last = 0;
+    myproc()->alarm_freq = ticks;
+    myproc()->alarm_handler = handler;
+
     return 0;
 }
 
