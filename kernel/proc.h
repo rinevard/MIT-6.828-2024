@@ -107,4 +107,6 @@ struct proc {
     int alarm_freq;              // How many ticks to call alarm_handler once
     uint64 alarm_handler;        // Handler's user virtual address
     int tick_from_last;          // How many ticks have passed since the last call
+    int is_alarming;
+    struct trapframe alarm_tf;
 };

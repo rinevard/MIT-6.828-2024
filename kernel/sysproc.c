@@ -80,14 +80,17 @@ uint64 sys_sigalarm(void) {
     argint(0, &ticks);
     argaddr(1, &handler);
 
-    myproc()->tick_from_last = 0;
     myproc()->alarm_freq = ticks;
     myproc()->alarm_handler = handler;
+    myproc()->tick_from_last = 0;
+    myproc()->is_alarming = 0;
 
     return 0;
 }
 
 uint64 sys_sigreturn(void) {
-    // STUB
-    return 0;
+    struct proc *p = myproc();
+    memmove(p->trapframe, &p->alarm_tf, sizeof(*p->trapframe));
+    p->is_alarming = 0;
+    return p->alarm_tf.a0;
 }

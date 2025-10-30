@@ -70,7 +70,10 @@ void usertrap(void) {
     // give up the CPU if this is a timer interrupt.
     if (which_dev == 2) {
         if (p->alarm_freq != 0) {
-            if (p->tick_from_last >= p->alarm_freq) {
+            if (!p->is_alarming && p->tick_from_last >= p->alarm_freq &&
+                p->tick_from_last % p->alarm_freq == 0) {
+                p->is_alarming = 1;
+                memmove(&p->alarm_tf, p->trapframe, sizeof(*p->trapframe));
                 p->trapframe->epc = p->alarm_handler;
                 p->tick_from_last = 0;
             } else {
