@@ -23,8 +23,14 @@ struct {
     struct run *freelist;
 } kmem;
 
+struct {
+    struct spinlock lock;
+    int refcnt[PHYSTOP / PGSIZE];
+} kref;
+
 void kinit() {
     initlock(&kmem.lock, "kmem");
+    initlock(&kref.lock, "kref");
     freerange(end, (void *)PHYSTOP);
 }
 
@@ -45,15 +51,20 @@ void kfree(void *pa) {
     if (((uint64)pa % PGSIZE) != 0 || (char *)pa < end || (uint64)pa >= PHYSTOP)
         panic("kfree");
 
-    // Fill with junk to catch dangling refs.
-    memset(pa, 1, PGSIZE);
+    kdecref((uint64)pa);
 
-    r = (struct run *)pa;
+    // Free physical memory only when no other reference exists
+    if (kgetref((uint64)pa) == 0) {
+        // Fill with junk to catch dangling refs.
+        memset(pa, 1, PGSIZE);
 
-    acquire(&kmem.lock);
-    r->next = kmem.freelist;
-    kmem.freelist = r;
-    release(&kmem.lock);
+        r = (struct run *)pa;
+
+        acquire(&kmem.lock);
+        r->next = kmem.freelist;
+        kmem.freelist = r;
+        release(&kmem.lock);
+    }
 }
 
 // Allocate one 4096-byte page of physical memory.
@@ -69,6 +80,31 @@ void *kalloc(void) {
     release(&kmem.lock);
 
     if (r)
+        kaddref((uint64)r);
+
+    if (r)
         memset((char *)r, 5, PGSIZE); // fill with junk
     return (void *)r;
+}
+
+void kaddref(uint64 pa) {
+    acquire(&kref.lock);
+    kref.refcnt[pa / PGSIZE] += 1;
+    release(&kref.lock);
+}
+
+void kdecref(uint64 pa) {
+    acquire(&kref.lock);
+    if (kref.refcnt[pa / PGSIZE] > 0) {
+        kref.refcnt[pa / PGSIZE] -= 1;
+    }
+    release(&kref.lock);
+}
+
+int kgetref(uint64 pa) {
+    int ref;
+    acquire(&kref.lock);
+    ref = kref.refcnt[pa / PGSIZE];
+    release(&kref.lock);
+    return ref;
 }
