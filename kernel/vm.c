@@ -5,6 +5,8 @@
 #include "riscv.h"
 #include "defs.h"
 #include "fs.h"
+#include "spinlock.h"
+#include "proc.h"
 
 /*
  * the kernel's page table.
@@ -286,7 +288,6 @@ int uvmcopy(pagetable_t old, pagetable_t new, uint64 sz) {
     pte_t *pte;
     uint64 pa, i;
     uint flags;
-    char *mem;
 
     for (i = 0; i < sz; i += PGSIZE) {
         if ((pte = walk(old, i, 0)) == 0)
@@ -295,13 +296,17 @@ int uvmcopy(pagetable_t old, pagetable_t new, uint64 sz) {
             panic("uvmcopy: page not present");
         pa = PTE2PA(*pte);
         flags = PTE_FLAGS(*pte);
-        if ((mem = kalloc()) == 0)
-            goto err;
-        memmove(mem, (char *)pa, PGSIZE);
-        if (mappages(new, i, PGSIZE, (uint64)mem, flags) != 0) {
-            kfree(mem);
+        if (mappages(new, i, PGSIZE, (uint64)pa, flags) != 0) {
             goto err;
         }
+        if (flags & PTE_W) {
+            pte_t *new_pte = walk(new, i, 0);
+            *pte &= (~PTE_W);
+            *new_pte &= (~PTE_W);
+            *pte |= (PTE_COW);
+            *new_pte |= (PTE_COW);
+        }
+        kaddref(pa);
     }
     return 0;
 
@@ -333,9 +338,15 @@ int copyout(pagetable_t pagetable, uint64 dstva, char *src, uint64 len) {
         if (va0 >= MAXVA)
             return -1;
         pte = walk(pagetable, va0, 0);
-        if (pte == 0 || (*pte & PTE_V) == 0 || (*pte & PTE_U) == 0 ||
-            (*pte & PTE_W) == 0)
+        if (pte == 0 || (*pte & PTE_V) == 0 || (*pte & PTE_U) == 0)
             return -1;
+        if ((*pte & PTE_W) == 0) {
+            if ((*pte & PTE_COW) && writefault(pagetable, va0) != 0) {
+                // copy on write
+            } else {
+                return -1;
+            }
+        }
         pa0 = PTE2PA(*pte);
         n = PGSIZE - (dstva - va0);
         if (n > len)
@@ -410,5 +421,57 @@ int copyinstr(pagetable_t pagetable, char *dst, uint64 srcva, uint64 max) {
         return 0;
     } else {
         return -1;
+    }
+}
+
+// return 0 if error, and physical address if successful.
+uint64 writefault(pagetable_t pagetable, uint64 va) {
+    pte_t *pte;
+    uint64 pa;
+    uint flags;
+    int refcnt;
+
+    struct proc *p = myproc();
+    if (va >= p->sz) {
+        return 0;
+    }
+
+    va = PGROUNDDOWN(va);
+
+    pte = walk(pagetable, va, 0);
+    if (pte == 0)
+        return 0;
+
+    flags = PTE_FLAGS(*pte);
+    if (!(flags & PTE_COW)) {
+        // read-only page
+        return 0;
+    }
+
+    pa = PTE2PA(*pte);
+    if ((refcnt = kgetref(pa)) == 0) {
+        // no process ref this page
+        return 0;
+    } else if (refcnt == 1) {
+        // only one process ref this page, change it to a regular writeable page
+        *pte &= (~PTE_COW);
+        *pte |= (PTE_W);
+        return pa;
+    } else {
+        // copy on write
+        char *mem;
+        if ((mem = kalloc()) == 0) {
+            return 0;
+        }
+        memmove(mem, (char *)pa, PGSIZE);
+        *pte &= (~PTE_V); // make mappages work
+        if (mappages(pagetable, va, PGSIZE, (uint64)mem, flags) != 0) {
+            kfree(mem);
+            return 0;
+        }
+        *pte &= (~PTE_COW);
+        *pte |= (PTE_W);
+        kdecref(pa);
+        return pa;
     }
 }

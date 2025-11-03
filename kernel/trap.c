@@ -57,6 +57,8 @@ void usertrap(void) {
         syscall();
     } else if ((which_dev = devintr()) != 0) {
         // ok
+    } else if ((r_scause() == 15) && writefault(p->pagetable, r_stval()) != 0) {
+        // copy on write
     } else {
         printf("usertrap(): unexpected scause 0x%lx pid=%d\n", r_scause(),
                p->pid);
