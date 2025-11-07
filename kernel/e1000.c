@@ -128,8 +128,7 @@ static void e1000_recv(void) {
     //
     acquire(&e1000_lock);
     uint32 idx = (regs[E1000_RDT] + 1) % RX_RING_SIZE;
-    while (idx != regs[E1000_RDH] &&
-           (rx_ring[idx].status & E1000_RXD_STAT_DD)) {
+    while (rx_ring[idx].status & E1000_RXD_STAT_DD) {
 
         char *recv_buf = rx_bufs[idx];
         int buflen = rx_ring[idx].length;
