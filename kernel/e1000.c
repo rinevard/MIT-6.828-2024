@@ -146,7 +146,8 @@ static void e1000_recv(void) {
         net_rx(recv_buf, buflen);
         acquire(&e1000_lock);
     }
-    regs[E1000_RDT] = idx;
+    // set RDT to the last processed index
+    regs[E1000_RDT] = (idx + RX_RING_SIZE - 1) % RX_RING_SIZE;
     release(&e1000_lock);
 }
 
