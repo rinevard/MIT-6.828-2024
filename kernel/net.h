@@ -118,3 +118,13 @@ struct dns_data {
     uint32 ttl;
     uint16 len;
 } __attribute__((packed));
+
+#define MAX_LISTEN_PORTS 128
+#define PACKET_RING_SIZE 16 // for any given port, no more than 16 packets should be saved
+struct listener {
+    int used;
+    int port;
+    char *packet_ring[PACKET_RING_SIZE];
+    int head; // used by writer
+    int tail; // used by reader
+};

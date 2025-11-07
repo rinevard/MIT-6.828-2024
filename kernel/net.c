@@ -18,8 +18,17 @@ static uint32 local_ip = MAKE_IP_ADDR(10, 0, 2, 15);
 static uint8 host_mac[ETHADDR_LEN] = {0x52, 0x55, 0x0a, 0x00, 0x02, 0x02};
 
 static struct spinlock netlock;
+static struct listener listeners[MAX_LISTEN_PORTS];
 
-void netinit(void) { initlock(&netlock, "netlock"); }
+void netinit(void) {
+    initlock(&netlock, "netlock");
+    for (int i = 0; i < MAX_LISTEN_PORTS; i++) {
+        listeners[i].used = 0;
+        for (int j = 0; j < PACKET_RING_SIZE; j++) {
+            listeners[i].packet_ring[j] = 0;
+        }
+    }
+}
 
 //
 // bind(int port)
@@ -31,6 +40,34 @@ uint64 sys_bind(void) {
     // Your code here.
     //
 
+    int port;
+
+    argint(0, &port);
+
+    acquire(&netlock);
+
+    // return error if repeated binding
+    for (int i = 0; i < MAX_LISTEN_PORTS; i++) {
+        if (listeners[i].used && listeners[i].port == port) {
+            goto bad;
+        }
+    }
+
+    for (int i = 0; i < MAX_LISTEN_PORTS; i++) {
+        if (!listeners[i].used) {
+            // use the first unused listener for port
+            listeners[i].used = 1;
+            listeners[i].port = port;
+            listeners[i].head = 0;
+            listeners[i].tail = 0;
+            release(&netlock);
+            return 0;
+        }
+    }
+    goto bad;
+
+bad:
+    release(&netlock);
     return -1;
 }
 
@@ -66,6 +103,81 @@ uint64 sys_recv(void) {
     //
     // Your code here.
     //
+    struct proc *p;
+    int dport;
+    uint64 src;
+    uint64 sport;
+    uint64 buf;
+    int maxlen;
+    struct listener *listener = 0;
+
+    p = myproc();
+    argint(0, &dport);
+    argaddr(1, &src);
+    argaddr(2, &sport);
+    argaddr(3, &buf);
+    argint(4, &maxlen);
+
+    // find listener related to dport
+    acquire(&netlock);
+    for (int i = 0; i < MAX_LISTEN_PORTS; i++) {
+        listener = &listeners[i];
+        if (listener->used && listener->port == dport) {
+            break;
+        }
+        listener = 0;
+    }
+    if (!listener) {
+        goto bad;
+    }
+
+    // return the earliest waiting packet or wait until a packet arrives
+    while (1) {
+        if (listener->packet_ring[listener->tail]) {
+            char *packet = listener->packet_ring[listener->tail];
+            listener->packet_ring[listener->tail] = 0;
+            listener->tail = (listener->tail + 1) % PACKET_RING_SIZE;
+
+            struct ip *ip_packet = (struct ip *)(packet + sizeof(struct eth));
+            struct udp *udp_packet =
+                (struct udp *)(packet + sizeof(struct eth) + sizeof(struct ip));
+            void *payload = ((char *)udp_packet) + sizeof(struct udp);
+
+            // re-arrange the bytes
+            uint32 src_ip = ntohl(ip_packet->ip_src);
+            uint16 src_port = ntohs(udp_packet->sport);
+            if (copyout(p->pagetable, src, (char *)&src_ip, sizeof(src_ip)) <
+                0) {
+                kfree(packet);
+                goto bad;
+            }
+            if (copyout(p->pagetable, sport, (char *)&src_port,
+                        sizeof(src_port)) < 0) {
+                kfree(packet);
+                goto bad;
+            }
+
+            // copy at most maxlen bytes of the payload
+            // and removes the packet from the ring
+            uint16 buflen = ntohs(udp_packet->ulen) - sizeof(struct udp);
+            uint64 cplen = (buflen > maxlen) ? maxlen : buflen;
+            if (copyout(p->pagetable, buf, payload, cplen) < 0) {
+                kfree(packet);
+                goto bad;
+            }
+            kfree(packet);
+
+            release(&netlock);
+            return cplen;
+        } else {
+            // wait until a packet arrives
+            sleep(listener->packet_ring, &netlock);
+        }
+    }
+    goto bad;
+
+bad:
+    release(&netlock);
     return -1;
 }
 
@@ -175,6 +287,37 @@ void ip_rx(char *buf, int len) {
     //
     // Your code here.
     //
+    struct udp *udp_packet;
+    struct listener *listener = 0;
+
+    udp_packet = (struct udp *)(buf + sizeof(struct eth) + sizeof(struct ip));
+
+    acquire(&netlock);
+    for (int i = 0; i < MAX_LISTEN_PORTS; i++) {
+        listener = &listeners[i];
+        // try best to save packet in listener related to dport
+        if (listener->used && listener->port == ntohs(udp_packet->dport)) {
+            int head = listener->head;
+
+            // if ring is full, drop the incoming packet
+            if (listener->packet_ring[head] != 0) {
+                kfree(buf);
+                release(&netlock);
+                return;
+            }
+
+            // save packet in listener
+            listener->packet_ring[head] = buf;
+            listener->head = (head + 1) % PACKET_RING_SIZE;
+
+            wakeup(listener->packet_ring);
+            release(&netlock);
+            return;
+        }
+    }
+    kfree(buf);
+    release(&netlock);
+    return;
 }
 
 //
