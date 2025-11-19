@@ -134,10 +134,12 @@ uint64 sys_recv(void) {
     // return the earliest waiting packet or wait until a packet arrives
     while (1) {
         if (listener->packet_ring[listener->tail]) {
+            // extract a packet from the ring
             char *packet = listener->packet_ring[listener->tail];
             listener->packet_ring[listener->tail] = 0;
             listener->tail = (listener->tail + 1) % PACKET_RING_SIZE;
 
+            // extract data from the packet
             struct ip *ip_packet = (struct ip *)(packet + sizeof(struct eth));
             struct udp *udp_packet =
                 (struct udp *)(packet + sizeof(struct eth) + sizeof(struct ip));
@@ -157,8 +159,7 @@ uint64 sys_recv(void) {
                 goto bad;
             }
 
-            // copy at most maxlen bytes of the payload
-            // and removes the packet from the ring
+            // copy at most maxlen bytes of the payload and free the packet
             uint16 buflen = ntohs(udp_packet->ulen) - sizeof(struct udp);
             uint64 cplen = (buflen > maxlen) ? maxlen : buflen;
             if (copyout(p->pagetable, buf, payload, cplen) < 0) {
