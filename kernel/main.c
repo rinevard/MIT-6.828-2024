@@ -5,9 +5,11 @@
 #include "defs.h"
 
 volatile static int started = 0;
+int ncpu = 0;
 
 // start() jumps here in supervisor mode on all CPUs.
 void main() {
+    __sync_fetch_and_add(&ncpu, 1);
     if (cpuid() == 0) {
         consoleinit();
 #if defined(LAB_LOCK)
