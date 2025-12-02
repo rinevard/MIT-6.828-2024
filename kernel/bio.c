@@ -80,21 +80,6 @@ static struct buf *bget(uint dev, uint blockno) {
     // Not cached.
     release(&buckets[dest].lock);
 
-    acquire(&bcache.steal_lock);
-    acquire(&buckets[dest].lock);
-
-    // double check, other process might have stolen before we steal
-    for (b = buckets[dest].head.next; b; b = b->next) {
-        if (b->dev == dev && b->blockno == blockno) {
-            b->refcnt++;
-            release(&buckets[dest].lock);
-            release(&bcache.steal_lock);
-            acquiresleep(&b->lock);
-            return b;
-        }
-    }
-    release(&buckets[dest].lock);
-
     // steal from another bucket
     for (int i = 0; i < BUCKET_SIZE; i++) {
         acquire(&buckets[i].lock);
@@ -117,13 +102,22 @@ static struct buf *bget(uint dev, uint blockno) {
                 if (b->next) {
                     b->next->prev = b;
                 }
+                // double check, other process might have stolen before we steal
+                for (struct buf *check = buckets[dest].head.next; check;
+                     check = check->next) {
+                    if (check->dev == dev && check->blockno == blockno) {
+                        check->refcnt++;
+                        release(&buckets[dest].lock);
+                        acquiresleep(&check->lock);
+                        return check;
+                    }
+                }
                 b->dev = dev;
                 b->blockno = blockno;
                 b->valid = 0;
                 b->refcnt = 1;
-                acquiresleep(&b->lock);
                 release(&buckets[dest].lock);
-                release(&bcache.steal_lock);
+                acquiresleep(&b->lock);
                 return b;
             }
         }
