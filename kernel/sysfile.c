@@ -105,6 +105,11 @@ uint64 sys_fstat(void) {
     return filestat(f, st);
 }
 
+uint64 sys_symlink(void) {
+    // int symlink(const char *oldpath, const char *newpath)
+    return 0;
+}
+
 // Create the path new as a link to the same inode as old.
 uint64 sys_link(void) {
     char name[DIRSIZ], new[MAXPATH], old[MAXPATH];
