@@ -105,11 +105,6 @@ uint64 sys_fstat(void) {
     return filestat(f, st);
 }
 
-uint64 sys_symlink(void) {
-    // int symlink(const char *oldpath, const char *newpath)
-    return 0;
-}
-
 // Create the path new as a link to the same inode as old.
 uint64 sys_link(void) {
     char name[DIRSIZ], new[MAXPATH], old[MAXPATH];
@@ -289,7 +284,7 @@ uint64 sys_open(void) {
     int fd, omode;
     struct file *f;
     struct inode *ip;
-    int n;
+    int n, symcnt, len;
 
     argint(1, &omode);
     if ((n = argstr(0, path, MAXPATH)) < 0)
@@ -303,12 +298,40 @@ uint64 sys_open(void) {
             end_op();
             return -1;
         }
-    } else {
+    } else if (omode & O_NOFOLLOW) {
         if ((ip = namei(path)) == 0) {
             end_op();
             return -1;
         }
         ilock(ip);
+        if (ip->type == T_DIR && omode != O_RDONLY) {
+            iunlockput(ip);
+            end_op();
+            return -1;
+        }
+    } else {
+        symcnt = 0;
+        if ((ip = namei(path)) == 0) {
+            end_op();
+            return -1;
+        }
+        ilock(ip);
+        while (ip->type == T_SYMLINK) {
+            symcnt++;
+            if (symcnt >= 10) {
+                iunlockput(ip);
+                end_op();
+                return -1;
+            }
+            readi(ip, 0, (uint64)&len, 0, sizeof(len));
+            readi(ip, 0, (uint64)path, sizeof(len), len + 1);
+            iunlockput(ip);
+            if ((ip = namei(path)) == 0) {
+                end_op();
+                return -1;
+            }
+            ilock(ip);
+        }
         if (ip->type == T_DIR && omode != O_RDONLY) {
             iunlockput(ip);
             end_op();
@@ -380,6 +403,26 @@ uint64 sys_mknod(void) {
     }
     iunlockput(ip);
     end_op();
+    return 0;
+}
+
+uint64 sys_symlink(void) {
+    char old[MAXPATH], new[MAXPATH];
+    struct inode *ip;
+    int len;
+
+    begin_op();
+    if (argstr(0, old, MAXPATH) < 0 || argstr(1, new, MAXPATH) < 0 ||
+        (ip = create(new, T_SYMLINK, 0, 0)) == 0) {
+        end_op();
+        return -1;
+    }
+    len = strlen(old);
+    writei(ip, 0, (uint64)&len, 0, sizeof(len));
+    writei(ip, 0, (uint64)old, sizeof(len), len + 1);
+    iunlockput(ip);
+    end_op();
+
     return 0;
 }
 
