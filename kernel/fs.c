@@ -409,6 +409,9 @@ static uint bmap(struct inode *ip, uint bn) {
             }
         }
         brelse(bp);
+        if (addr == 0) {
+            return 0;
+        }
 
         // Find addr in block
         bp = bread(ip->dev, addr);
