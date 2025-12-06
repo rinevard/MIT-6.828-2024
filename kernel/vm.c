@@ -438,6 +438,7 @@ uint64 vmfault(pagetable_t pagetable, uint64 va, int read) {
     printf("va: %lu\n", va);
     uint64 mem;
     int perm, i;
+    uint off;
     struct file *f = 0;
     struct proc *p = myproc();
 
@@ -464,7 +465,10 @@ uint64 vmfault(pagetable_t pagetable, uint64 va, int read) {
         return 0;
     memset((void *)mem, 0, PGSIZE);
     ilock(f->ip);
-    readi(f->ip, 0, mem, PGROUNDDOWN(va) - p->mmap_rec[i].addr, PGSIZE);
+    off = PGROUNDDOWN(va) - p->mmap_rec[i].addr + p->mmap_rec[i].off;
+    if (off > f->ip->size)
+        return 0;
+    readi(f->ip, 0, mem, off, PGSIZE);
     iunlock(f->ip);
 
     // Map page

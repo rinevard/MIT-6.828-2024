@@ -471,6 +471,13 @@ uint64 sys_pipe(void) {
     return 0;
 }
 
+void printmmap(int i) {
+    struct proc *p;
+    p = myproc();
+    printf("addr: %lu, len: %d, off: %d\n", p->mmap_rec[i].addr,
+           p->mmap_rec[i].len, p->mmap_rec[i].off);
+}
+
 uint64 sys_mmap(void) {
     int len, prot, flags;
     struct file *f;
@@ -498,6 +505,7 @@ uint64 sys_mmap(void) {
             p->mmap_rec[i].prot = prot;
             p->mmap_rec[i].flags = flags;
             p->mmap_rec[i].f = f;
+            p->mmap_rec[i].off = 0;
             filedup(f);
             break;
         }
@@ -508,16 +516,101 @@ uint64 sys_mmap(void) {
     }
 
     p->sz = PGROUNDUP(p->sz) + PGROUNDUP(len);
+    printf("mmap: ");
+    printmmap(i);
     return p->mmap_rec[i].addr;
 }
 
+#define min(a, b) ((a) < (b) ? (a) : (b))
 uint64 sys_munmap(void) {
-    // int munmap(void *addr, size_t len);
-    uint64 addr;
+    struct file *f;
+    uint64 addr, fileend, src;
     int len;
+    struct proc *p;
+    int i, pg;
 
     argaddr(0, &addr);
     argint(1, &len);
+
+    p = myproc();
+
+    // Find mmap metadata corresponding to addr
+    for (i = 0; i < 16; i++) {
+        if (p->mmap_rec[i].valid && p->mmap_rec[i].addr <= addr &&
+            addr < p->mmap_rec[i].addr + p->mmap_rec[i].len) {
+            f = p->mmap_rec[i].f;
+            ilock(f->ip);
+            fileend = p->mmap_rec[i].addr - p->mmap_rec[i].off + f->ip->size;
+            iunlock(f->ip);
+            break;
+        }
+    }
+    if (i == 16) {
+        // No mmap corresponding to addr
+        return -1;
+    }
+
+    printf("munmap: ");
+    printmmap(i);
+
+    for (pg = 0; pg * PGSIZE < len; pg++) {
+        if (walkaddr(p->pagetable, addr + pg * PGSIZE)) {
+            if (p->mmap_rec[i].flags & MAP_SHARED) {
+                // Write valid pages back to file
+                int max = ((MAXOPBLOCKS - 1 - 1 - 2) / 2) * BSIZE;
+                int tot = min(PGSIZE, fileend - (addr + pg * PGSIZE));
+                int r, written = 0;
+
+                while (written < tot) {
+                    int n = tot - written;
+                    if (n > max)
+                        n = max;
+
+                    begin_op();
+                    ilock(f->ip);
+                    src = addr + pg * PGSIZE + written;
+                    r = writei(f->ip, 1, src,
+                               src - p->mmap_rec[i].addr + p->mmap_rec[i].off,
+                               n);
+                    iunlock(f->ip);
+                    end_op();
+
+                    if (r != n) {
+                        printf("err from writei\n");
+                        printf("r: %d, n: %d, tot: %d, written: %d\n", r, n,
+                               tot, written);
+                        return -1;
+                    }
+                    written += r;
+                }
+            }
+            uvmunmap(p->pagetable, addr + pg * PGSIZE, 1, 1);
+        }
+    }
+    // printf("pg: %d\n", pg);
+    if (addr == p->mmap_rec[i].addr &&
+        addr + len == p->mmap_rec[i].addr + p->mmap_rec[i].len) {
+        printf("case1\n");
+        // Remove all pages of the mmap
+        p->mmap_rec[i].valid = 0;
+        fileclose(f); // TODO: shall we call fileclose here?
+        return 0;
+    } else if (addr == p->mmap_rec[i].addr) {
+        printf("case2\n");
+        // unmap at the start
+        p->mmap_rec[i].addr += PGROUNDUP(len);
+        p->mmap_rec[i].len -= PGROUNDUP(len);
+        p->mmap_rec[i].off += PGROUNDUP(len);
+        return 0;
+    } else if (addr + len == p->mmap_rec[i].addr + p->mmap_rec[i].len) {
+        printf("case3\n");
+        // unmap at the end
+        p->mmap_rec[i].len -= PGROUNDUP(len);
+        return 0;
+    } else {
+        // No need to consider hole punching case in this lab
+        printf("else\n");
+    }
 
     return -1;
 }
