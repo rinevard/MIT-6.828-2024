@@ -472,9 +472,52 @@ uint64 sys_pipe(void) {
 }
 
 uint64 sys_mmap(void) {
-    return 0;
+    int len, prot, flags;
+    struct file *f;
+    struct proc *p;
+    int i;
+
+    // Ignore args[0], `addr`, which is always zero
+    argint(1, &len);
+    argint(2, &prot);
+    argint(3, &flags);
+    if (argfd(4, 0, &f) < 0) {
+        return -1;
+    }
+    // Ignore arg[5], `offset`, which is always zero
+    if (!f->writable && (flags & MAP_SHARED) && (prot & PROT_WRITE)) {
+        return -1;
+    }
+
+    p = myproc();
+    for (i = 0; i < 16; i++) {
+        if (!p->mmap_rec[i].valid) {
+            p->mmap_rec[i].valid = 1;
+            p->mmap_rec[i].addr = PGROUNDUP(p->sz);
+            p->mmap_rec[i].len = len;
+            p->mmap_rec[i].prot = prot;
+            p->mmap_rec[i].flags = flags;
+            p->mmap_rec[i].f = f;
+            filedup(f);
+            break;
+        }
+    }
+    if (i == 16) {
+        // No space to save metadata for this mmap
+        return -1;
+    }
+
+    p->sz = PGROUNDUP(p->sz) + PGROUNDUP(len);
+    return p->mmap_rec[i].addr;
 }
 
 uint64 sys_munmap(void) {
-    return 0;
+    // int munmap(void *addr, size_t len);
+    uint64 addr;
+    int len;
+
+    argaddr(0, &addr);
+    argint(1, &len);
+
+    return -1;
 }

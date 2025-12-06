@@ -5,6 +5,11 @@
 #include "riscv.h"
 #include "defs.h"
 #include "fs.h"
+#include "spinlock.h"
+#include "proc.h"
+#include "fcntl.h"
+#include "sleeplock.h"
+#include "file.h"
 
 /*
  * the kernel's page table.
@@ -411,4 +416,68 @@ int copyinstr(pagetable_t pagetable, char *dst, uint64 srcva, uint64 max) {
     } else {
         return -1;
     }
+}
+
+int ismapped(pagetable_t pagetable, uint64 va) {
+    pte_t *pte = walk(pagetable, va, 0);
+    if (pte == 0) {
+        return 0;
+    }
+    if (*pte & PTE_V) {
+        return 1;
+    }
+    return 0;
+}
+
+// allocate and map user memory if process is referencing a page
+// that was lazily allocated in mmap().
+// returns 0 if va is invalid or already mapped, or if
+// out of physical memory, and physical address if successful.
+uint64 vmfault(pagetable_t pagetable, uint64 va, int read) {
+    printf("vmfault\n");
+    printf("va: %lu\n", va);
+    uint64 mem;
+    int perm, i;
+    struct file *f = 0;
+    struct proc *p = myproc();
+
+    if (va >= p->sz)
+        return 0;
+    if (ismapped(pagetable, va)) {
+        return 0;
+    }
+
+    // Find mmap metadata corresponding to va
+    for (i = 0; i < 16; i++) {
+        if (p->mmap_rec[i].valid && p->mmap_rec[i].addr <= va &&
+            va < p->mmap_rec[i].addr + p->mmap_rec[i].len) {
+            f = p->mmap_rec[i].f;
+            break;
+        }
+    }
+    if (!f)
+        return 0;
+
+    // Alloc new page and fill with file data
+    mem = (uint64)kalloc();
+    if (mem == 0)
+        return 0;
+    memset((void *)mem, 0, PGSIZE);
+    ilock(f->ip);
+    readi(f->ip, 0, mem, PGROUNDDOWN(va) - p->mmap_rec[i].addr, PGSIZE);
+    iunlock(f->ip);
+
+    // Map page
+    perm = PTE_U;
+    if (p->mmap_rec[i].prot & PROT_READ)
+        perm |= PTE_R;
+    if (p->mmap_rec[i].prot & PROT_WRITE)
+        perm |= PTE_W;
+    if (mappages(p->pagetable, PGROUNDDOWN(va), PGSIZE, mem, perm) != 0) {
+        kfree((void *)mem);
+        return 0;
+    }
+
+    return mem;
+    return 0;
 }

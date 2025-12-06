@@ -1,3 +1,4 @@
+#include "types.h"
 // Saved registers for kernel context switches.
 struct context {
     uint64 ra;
@@ -104,4 +105,12 @@ struct proc {
     struct file *ofile[NOFILE];  // Open files
     struct inode *cwd;           // Current directory
     char name[16];               // Process name (debugging)
+    struct {
+        int valid;      // Is this idx being used?
+        uint64 addr;     // Start of the file in mem, page aligned
+        int len;     // Number of bytes to map
+        int prot;       // PROT_READ or PROT_WRITE or both
+        int flags;      // MAP_SHARED or MAP_PRIVATE
+        struct file *f;         // Mapped file
+    } mmap_rec[16];
 };
