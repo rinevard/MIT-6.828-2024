@@ -10,6 +10,6 @@ RISC-V 特权/非特权手册中译：[riscv-privileged-cn](riscv-privileged-cn.
 
 RISC-V 指令集简介：[RISC-V 指令集架構介紹 | Jim's Dev Blog](https://tclin914.github.io/77838749/)
 
-Lab Net 用到的 E1000 文档（中英对照机翻）：[E1000_dual](lab-net/E1000 Software Developer's Manual_dual.pdf)
+Lab Net 用到的 E1000 文档（中英对照机翻）：[E1000_dual](lab-net/E1000SoftwareDeveloper'sManual_dual.pdf)
 
 课程后半段的论文课用到的一些论文（不全，中英对照机翻）：[papers](papers)
