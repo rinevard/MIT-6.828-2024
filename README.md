@@ -2,6 +2,8 @@
 
 这个仓库记录了我对 2024 版本的 MIT 6.S081 的 Labs 的实现。可以用 `git checkout <branch>` 来切换到对应的分支查看完整 lab 代码。
 
+## Lab 笔记
+
 笔记在 [notes](notes) 目录下。
 
 | lab | note | branch |
@@ -15,3 +17,9 @@
 | Lab 7 Lock | [lab7-lock.md](notes/lab7-lock.md) | lock |
 | Lab 8 File System | [lab8-fs.md](notes/lab8-fs.md) | fs |
 | Lab 9 mmap | [lab9-mmap.md](notes/lab9-mmap.md) | mmap |
+
+## 其他资料
+
+我在学习过程中还用到了许多资料，其中最重要的是每节课的中文文字版。看这个和看视频效果差不多，但这是2020版本的视频文字版，和当前的代码略有不一致：https://mit-public-courses-cn-translatio.gitbook.io/
+
+另外一些有用的资料被我放在了 [resources](resources) 目录下。
