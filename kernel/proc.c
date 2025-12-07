@@ -283,6 +283,14 @@ int fork(void) {
             np->ofile[i] = filedup(p->ofile[i]);
     np->cwd = idup(p->cwd);
 
+    // Copy mmap
+    for (i = 0; i < NMMAP; i++) {
+        if (p->mmap[i].valid) {
+            np->mmap[i] = p->mmap[i];
+            filedup(np->mmap[i].f);
+        }
+    }
+
     safestrcpy(np->name, p->name, sizeof(p->name));
 
     pid = np->pid;

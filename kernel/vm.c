@@ -173,10 +173,14 @@ void uvmunmap(pagetable_t pagetable, uint64 va, uint64 npages, int do_free) {
         panic("uvmunmap: not aligned");
 
     for (a = va; a < va + npages * PGSIZE; a += PGSIZE) {
-        if ((pte = walk(pagetable, a, 0)) == 0)
+        if ((pte = walk(pagetable, a, 0)) == 0) {
+            continue;
             panic("uvmunmap: walk");
-        if ((*pte & PTE_V) == 0)
+        }
+        if ((*pte & PTE_V) == 0) {
+            continue;
             panic("uvmunmap: not mapped");
+        }
         if (PTE_FLAGS(*pte) == PTE_V)
             panic("uvmunmap: not a leaf");
         if (do_free) {
@@ -294,10 +298,14 @@ int uvmcopy(pagetable_t old, pagetable_t new, uint64 sz) {
     char *mem;
 
     for (i = 0; i < sz; i += PGSIZE) {
-        if ((pte = walk(old, i, 0)) == 0)
+        if ((pte = walk(old, i, 0)) == 0) {
+            continue;
             panic("uvmcopy: pte should exist");
-        if ((*pte & PTE_V) == 0)
+        }
+        if ((*pte & PTE_V) == 0) {
+            continue;
             panic("uvmcopy: page not present");
+        }
         pa = PTE2PA(*pte);
         flags = PTE_FLAGS(*pte);
         if ((mem = kalloc()) == 0)
@@ -435,7 +443,7 @@ int ismapped(pagetable_t pagetable, uint64 va) {
 // out of physical memory, and physical address if successful.
 uint64 vmfault(pagetable_t pagetable, uint64 va, int read) {
     printf("vmfault\n");
-    printf("va: %lu\n", va);
+    printf("va: %lu, related page: %lu\n", va, PGROUNDDOWN(va));
     uint64 mem;
     int perm, i;
     uint off;
@@ -483,5 +491,4 @@ uint64 vmfault(pagetable_t pagetable, uint64 va, int read) {
     }
 
     return mem;
-    return 0;
 }
