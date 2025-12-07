@@ -1,4 +1,5 @@
 #include "types.h"
+#include "param.h"
 // Saved registers for kernel context switches.
 struct context {
     uint64 ra;
@@ -113,5 +114,5 @@ struct proc {
         int flags;      // MAP_SHARED or MAP_PRIVATE
         struct file *f;         // Mapped file
         int off;
-    } mmap[16];
+    } mmap[NMMAP];
 };

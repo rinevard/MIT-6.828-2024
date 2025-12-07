@@ -527,7 +527,8 @@ uint64 sys_munmap(void) {
     uint64 addr;
     int len;
     struct proc *p;
-    int i, pg;
+    int i;
+    // int i, pg;
 
     argaddr(0, &addr);
     argint(1, &len);
@@ -538,7 +539,7 @@ uint64 sys_munmap(void) {
 
     p = myproc();
 
-    // Find mmap metadata corresponding to addr
+    // Find mmap corresponding to addr
     for (i = 0; i < NMMAP; i++) {
         if (p->mmap[i].valid && p->mmap[i].st <= addr &&
             addr < p->mmap[i].st + p->mmap[i].len) {
@@ -548,11 +549,7 @@ uint64 sys_munmap(void) {
     }
     if (i == NMMAP) {
         // No mmap corresponding to addr
-        for (pg = 0; pg * PGSIZE < len; pg++) {
-            if (walkaddr(p->pagetable, addr + pg * PGSIZE)) {
-                uvmunmap(p->pagetable, addr + pg * PGSIZE, 1, 1);
-            }
-        }
+        uvmunmap(p->pagetable, addr, PGROUNDUP(len) / PGSIZE, 1);
         return 0;
     }
 
@@ -563,11 +560,7 @@ uint64 sys_munmap(void) {
         };
     }
 
-    for (pg = 0; pg * PGSIZE < len; pg++) {
-        if (walkaddr(p->pagetable, addr + pg * PGSIZE)) {
-            uvmunmap(p->pagetable, addr + pg * PGSIZE, 1, 1);
-        }
-    }
+    uvmunmap(p->pagetable, addr, PGROUNDUP(len) / PGSIZE, 1);
 
     if (addr == p->mmap[i].st && addr + len == p->mmap[i].st + p->mmap[i].len) {
         p->mmap[i].valid = 0;
