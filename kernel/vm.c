@@ -449,10 +449,10 @@ uint64 vmfault(pagetable_t pagetable, uint64 va, int read) {
     }
 
     // Find mmap metadata corresponding to va
-    for (i = 0; i < 16; i++) {
-        if (p->mmap_rec[i].valid && p->mmap_rec[i].addr <= va &&
-            va < p->mmap_rec[i].addr + p->mmap_rec[i].len) {
-            f = p->mmap_rec[i].f;
+    for (i = 0; i < NMMAP; i++) {
+        if (p->mmap[i].valid && p->mmap[i].st <= va &&
+            va < p->mmap[i].st + p->mmap[i].len) {
+            f = p->mmap[i].f;
             break;
         }
     }
@@ -465,7 +465,7 @@ uint64 vmfault(pagetable_t pagetable, uint64 va, int read) {
         return 0;
     memset((void *)mem, 0, PGSIZE);
     ilock(f->ip);
-    off = PGROUNDDOWN(va) - p->mmap_rec[i].addr + p->mmap_rec[i].off;
+    off = PGROUNDDOWN(va) - p->mmap[i].st + p->mmap[i].off;
     if (off > f->ip->size)
         return 0;
     readi(f->ip, 0, mem, off, PGSIZE);
@@ -473,9 +473,9 @@ uint64 vmfault(pagetable_t pagetable, uint64 va, int read) {
 
     // Map page
     perm = PTE_U;
-    if (p->mmap_rec[i].prot & PROT_READ)
+    if (p->mmap[i].prot & PROT_READ)
         perm |= PTE_R;
-    if (p->mmap_rec[i].prot & PROT_WRITE)
+    if (p->mmap[i].prot & PROT_WRITE)
         perm |= PTE_W;
     if (mappages(p->pagetable, PGROUNDDOWN(va), PGSIZE, mem, perm) != 0) {
         kfree((void *)mem);

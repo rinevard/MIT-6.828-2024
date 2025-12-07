@@ -5,6 +5,10 @@
 #include "spinlock.h"
 #include "proc.h"
 #include "defs.h"
+#include "fcntl.h"
+#include "fs.h"
+#include "sleeplock.h"
+#include "file.h"
 
 struct cpu cpus[NCPU];
 
@@ -309,6 +313,7 @@ void reparent(struct proc *p) {
     }
 }
 
+#define min(a, b) ((a) < (b) ? (a) : (b))
 // Exit the current process.  Does not return.
 // An exited process remains in the zombie state
 // until its parent calls wait().
@@ -324,6 +329,30 @@ void exit(int status) {
             struct file *f = p->ofile[fd];
             fileclose(f);
             p->ofile[fd] = 0;
+        }
+    }
+
+    // Close all mmaps
+    for (int i = 0; i < NMMAP; i++) {
+        if (p->mmap[i].valid) {
+            struct file *f;
+            uint64 addr;
+
+            f = p->mmap[i].f;
+            addr = p->mmap[i].st;
+
+            if (p->mmap[i].flags & MAP_SHARED) {
+                if (mmap_wbk(i, addr, p->mmap[i].len) < 0) {
+                    panic("mmap wbk failed");
+                };
+            }
+            for (int pg = 0; pg * PGSIZE < p->mmap[i].len; pg++) {
+                if (walkaddr(p->pagetable, addr + pg * PGSIZE)) {
+                    uvmunmap(p->pagetable, addr + pg * PGSIZE, 1, 1);
+                }
+            }
+            p->mmap[i].valid = 0;
+            fileclose(f);
         }
     }
 
@@ -350,6 +379,60 @@ void exit(int status) {
     // Jump into the scheduler, never to return.
     sched();
     panic("zombie exit");
+}
+
+// Write parts of a shared mmap[i] back to file
+// theses parts must in mappepd pages and addr must be page-aligned
+int mmap_wbk(int i, uint64 addr, int len) {
+    struct file *f;
+    uint64 fileend, src;
+    struct proc *p;
+    int pg;
+
+    if (addr % PGSIZE != 0) {
+        return -1;
+    }
+
+    p = myproc();
+
+    if (i >= NMMAP || !(p->mmap[i].flags & MAP_SHARED) ||
+        addr < p->mmap[i].st || addr + len > p->mmap[i].st + p->mmap[i].len) {
+        return -1;
+    }
+
+    f = p->mmap[i].f;
+    ilock(f->ip);
+    fileend = p->mmap[i].st - p->mmap[i].off + f->ip->size;
+    iunlock(f->ip);
+
+    // Write valid pages back to file
+    for (pg = 0; pg * PGSIZE < len; pg++) {
+        if (walkaddr(p->pagetable, addr + pg * PGSIZE)) {
+            int max = ((MAXOPBLOCKS - 1 - 1 - 2) / 2) * BSIZE;
+            int tot = min(PGSIZE, fileend - (addr + pg * PGSIZE));
+            int r, written = 0;
+
+            while (written < tot) {
+                int n = tot - written;
+                if (n > max)
+                    n = max;
+
+                begin_op();
+                ilock(f->ip);
+                src = addr + pg * PGSIZE + written;
+                r = writei(f->ip, 1, src, src - p->mmap[i].st + p->mmap[i].off,
+                           n);
+                iunlock(f->ip);
+                end_op();
+
+                if (r != n) {
+                    return -1;
+                }
+                written += r;
+            }
+        }
+    }
+    return 0;
 }
 
 // Wait for a child process to exit and return its pid.

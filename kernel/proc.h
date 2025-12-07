@@ -107,11 +107,11 @@ struct proc {
     char name[16];               // Process name (debugging)
     struct {
         int valid;      // Is this idx being used?
-        uint64 addr;     // Start of the mmap, page aligned
+        uint64 st;     // Start of the mmap, page aligned
         int len;     // Number of bytes to map
         int prot;       // PROT_READ or PROT_WRITE or both
         int flags;      // MAP_SHARED or MAP_PRIVATE
         struct file *f;         // Mapped file
         int off;
-    } mmap_rec[16];
+    } mmap[16];
 };
