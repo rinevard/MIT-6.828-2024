@@ -36,7 +36,7 @@ until - 运行到指定行号为止
 
 这道题让我们实现一个系统调用，按着 hints 按部就班就能做掉。唯一要注意的是在 syscall 里打印 trace 相关的内容时要把系统调用的返回值 ret 从原本的 `uint64` 转换为 `long long`，否则对那些可能返回 -1 的系统调用，我们无法正确打印 -1.
 
-在照着 hints 实现之后，看看系统调用是如何进行的也是更有趣的事情。我在 {% post_link learning/open-course/MIT-6.S081/Labs/lab2_1-syscall_process 'Lab 2.1 系统调用流程——以sleep为例' %} 中写得还挺详细的，这里不多赘述细节。
+在照着 hints 实现之后，看看系统调用是如何进行的也是更有趣的事情。我在 [syscall_process.md](./syscall_process.md) 中写得还挺详细的，这里不多赘述细节。
 
 简而言之，当我们进行系统调用时：
 
